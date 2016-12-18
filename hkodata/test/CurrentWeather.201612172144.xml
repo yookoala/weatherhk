@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet href="current.xsl" type="text/xsl" ?><rss version="2.0">
+  <channel>
+    <title>Current Weather</title>
+    <link>
+    http://www.weather.gov.hk/wxinfo/currwx/current.htm</link>
+    <description>Current Weather</description>
+    <language>en-us</language>
+    <copyright>The content available in this file, including but
+    not limited to all text, graphics, drawings, diagrams,
+    photographs and compilation of data or other materials are
+    protected by copyright. The Government of the Hong Kong Special
+    Administrative Region is the owner of all copyright works
+    contained in this website. Any reproduction, adaptation,
+    distribution, dissemination or making available of such
+    copyright works to the public is strictly prohibited unless
+    prior written authorization is obtained from the Hong Kong
+    Observatory.</copyright>
+    <image>
+      <title>Current Weather</title>
+      <link>http://www.weather.gov.hk/wxinfo/currwx/current.htm</link>
+	  <url>http://rss.weather.gov.hk/img/HKOlogo.gif</url>
+      <width>144</width>
+      <height>28</height>
+    </image>
+    <item>
+       <author>hkowm@hko.gov.hk</author>
+	  <guid isPermaLink="false">
+      http://rss.weather.gov.hk/rss/CurrentWeather/20161217210200</guid>
+<pubDate>Sat, 17 Dec 2016 13:02:00 GMT</pubDate>      <title>Bulletin updated at 21:02 HKT 17/12/2016</title>
+      <category>R</category>
+      <link>
+      http://www.weather.gov.hk/wxinfo/currwx/current.htm</link>
+        <description>
+        <![CDATA[
+         <img src="http://rss.weather.gov.hk/img/pic76.png" style="vertical-align: middle;">        <p>At 
+        9 p.m. 
+               at the Hong Kong Observatory :<br/>
+        Air temperature : 18 degrees Celsius<br/>
+        Relative Humidity : 71 per cent<br/>
+		 										    																											<p></p>
+                The air temperatures at other places were:
+                <br/>
+                <font size="-1">
+    <table border="0" cellspacing="0" cellpadding="0">
+    <tr><td><font size="-1">Hong Kong Observatory</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">King's Park</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Wong Chuk Hang</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Ta Kwu Ling</font></td><td width="100" align="right"><font size="-1">16 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Lau Fau Shan</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Tai Po</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Sha Tin</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Tuen Mun</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Tseung Kwan O</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Sai Kung</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Cheung Chau</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Chek Lap Kok</font></td><td width="100" align="right"><font size="-1">19 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Shek Kong</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Tsuen Wan Ho Koon</font></td><td width="100" align="right"><font size="-1">16 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Tsuen Wan Shing Mun Valley</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Hong Kong Park</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Shau Kei Wan</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Kowloon City</font></td><td width="100" align="right"><font size="-1">17 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Happy Valley</font></td><td width="100" align="right"><font size="-1">19 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Wong Tai Sin</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Stanley</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Kwun Tong</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Sham Shui Po</font></td><td width="100" align="right"><font size="-1">18 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Kai Tak Runway Park</font></td><td width="100" align="right"><font size="-1">19 degrees ;</font></td></tr>
+    <tr><td><font size="-1">Yuen Long Park</font></td><td width="100" align="right"><font size="-1">18 degrees .</font></td></tr>
+    </table></font></p>
+        ]]>
+        </description>
+    </item>
+  </channel>
+</rss>
