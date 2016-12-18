@@ -51,7 +51,7 @@ type CurrentWeather struct {
 	AirTemperature       Temperature
 	RelativeHumidity     float64
 	DistrictsTemperature DistrictsTemperature
-	Raw                  string
+	Raw                  string `json:"-"`
 }
 
 type ParseError []error
