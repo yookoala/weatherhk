@@ -14,6 +14,8 @@ import (
 )
 
 var port int
+var forceHTTPS bool
+var hostname string
 
 func init() {
 	portStr := os.Getenv("PORT")
@@ -24,18 +26,48 @@ func init() {
 	if port == 0 {
 		port = 8080 // fallback value
 	}
+
+	forceHTTPSStr := os.Getenv("FORCE_HTTPS")
+	forceHTTPS = (forceHTTPSStr == "TRUE")
+
+	hostname = os.Getenv("APP_HOSTNAME")
+	if hostname == "" {
+		hostname = "localhost"
+	}
+
+}
+
+func enforceHTTPS(w http.ResponseWriter, r *http.Request) bool {
+	log.Printf("X-Forwarded-Proto %s", r.Header.Get("X-Forwarded-Proto"))
+	if forceHTTPS && r.Header.Get("X-Forwarded-Proto") != "https" {
+		redirectURL := *r.URL
+		redirectURL.Host = hostname
+		redirectURL.Scheme = "https"
+		log.Printf("run here: %s", redirectURL)
+
+		w.Header().Set("Location", redirectURL.String())
+		w.WriteHeader(http.StatusMovedPermanently)
+		return true
+	}
+	return false
 }
 
 func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if enforceHTTPS(w, r) {
+			return
+		}
 		w.Header().Add("Content-Type", "text/html; charset=utf8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `<html><h1>Simple Hong Kong Weather API</h1><a href="/api/CurrentWeather.json">Current Weather</a></html>`)
 	})
 
 	r.HandleFunc("/api/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
+		if enforceHTTPS(w, r) {
+			return
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 
