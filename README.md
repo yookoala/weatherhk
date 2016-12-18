@@ -1,7 +1,9 @@
-# Weather HK
+# Weather HK [![Travis CI][travis-badge]][travis]
 
 A simple API wrapper to generate JSON form HK Observatory RSS feeds.
 
+[travis]: https://travis-ci.org/yookoala/weatherhk
+[travis-badge]: https://api.travis-ci.org/yookoala/weatherhk.svg?branch=master
 
 ## License
 
