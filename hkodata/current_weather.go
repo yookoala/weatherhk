@@ -13,6 +13,12 @@ import (
 	"github.com/mmcdole/gofeed/rss"
 )
 
+var HKT *time.Location
+
+func init() {
+	HKT, _ = time.LoadLocation("Asia/Hong_Kong")
+}
+
 // Temperature contains Temperature in degree celcius
 type Temperature int
 
@@ -93,7 +99,7 @@ func DecodeCurrentWeather(r io.Reader) (data *CurrentWeather, err error) {
 	reName := regexp.MustCompile(`[^\w]`)
 	reDegree := regexp.MustCompile(`^.*?(\d+) degree.+?$`)
 	data = &CurrentWeather{
-		PubDate: *feed.Items[0].PubDateParsed,
+		PubDate: feed.Items[0].PubDateParsed.In(HKT),
 		Raw:     doc.Text(),
 	}
 	distTempTyp := reflect.TypeOf(data.DistrictsTemperature)

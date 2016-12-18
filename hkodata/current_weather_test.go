@@ -20,8 +20,12 @@ func TestCurrentWeather(t *testing.T) {
 		t.Fatalf("unexpected error: %s", err.Error())
 	}
 
-	if want, have := time.Date(2016, time.December, 17, 13, 2, 0, 0, time.UTC), cw.PubDate; !want.Equal(have) {
+	HKT, _ := time.LoadLocation("Asia/Hong_Kong")
+	if want, have := time.Date(2016, time.December, 17, 21, 2, 0, 0, HKT), cw.PubDate; !want.Equal(have) {
 		t.Errorf("expected %s, got %s", want, have)
+	}
+	if want, have := HKT.String(), cw.PubDate.Location().String(); want != have {
+		t.Errorf("expected %#v, got %#v", want, have)
 	}
 	if want, have := hkodata.Temperature(18), cw.AirTemperature; want != have {
 		t.Errorf("expected %#v, got %#v", want, have)

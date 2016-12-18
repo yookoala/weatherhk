@@ -74,10 +74,12 @@ func main() {
 		enc.Encode(struct {
 			Status int                    `json:"status"`
 			Data   hkodata.CurrentWeather `json:"data"`
+			RSS    string                 `json:"rss"`
 			// Raw    string                 `json:"raw_data"`
 		}{
 			Status: http.StatusOK,
 			Data:   *data,
+			RSS:    "http://rss.weather.gov.hk/rss/CurrentWeather.xml",
 			// Raw:    data.Raw,
 		})
 	})
