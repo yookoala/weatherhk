@@ -100,8 +100,8 @@ func main() {
 
 		// RFC2616: Tue, 15 Nov 1994 12:45:26 GMT
 		// RFC1123: Mon, 02 Jan 2006 15:04:05 MST
-		w.Header().Set("Last-Modified", data.PubDate.Format(time.RFC1123))
-		w.Header().Set("Expires", data.Expires().Format(time.RFC1123))
+		w.Header().Set("Last-Modified", data.PubDate.In(time.UTC).Format(time.RFC1123))
+		w.Header().Set("Expires", data.Expires().In(time.UTC).Format(time.RFC1123))
 		w.WriteHeader(http.StatusOK)
 		enc.Encode(struct {
 			Status int                    `json:"status"`
@@ -148,8 +148,10 @@ func main() {
 			return
 		}
 
-		w.Header().Set("Last-Modified", data.PubDate.Format(time.RFC1123))
-		w.Header().Set("Expires", data.Expires().Format(time.RFC1123))
+		// RFC2616: Tue, 15 Nov 1994 12:45:26 GMT
+		// RFC1123: Mon, 02 Jan 2006 15:04:05 MST
+		w.Header().Set("Last-Modified", data.PubDate.In(time.UTC).Format(time.RFC1123))
+		w.Header().Set("Expires", data.Expires().In(time.UTC).Format(time.RFC1123))
 		w.WriteHeader(http.StatusOK)
 
 		enc.Encode(struct {
