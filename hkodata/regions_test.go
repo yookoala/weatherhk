@@ -1,10 +1,13 @@
 package hkodata_test
 
 import (
+	"encoding/json"
 	"os"
+	"reflect"
 	"testing"
 	"time"
 
+	pretty "github.com/tonnerre/golang-pretty"
 	"github.com/yookoala/weatherhk/hkodata"
 )
 
@@ -24,439 +27,450 @@ func TestDecodeRegionJSON(t *testing.T) {
 		hkodata.Region{
 			Name:             hkodata.RegionName("hka"),
 			ShortName:        "hka",
-			CurrentTemp:      24.1,
-			RelativeHumidity: .54,
+			CurrentTemp:      hkodata.NewTemperature(24.1),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.54),
 			WindDirection:    "E",
-			WindSpeed:        24,
-			MaxTemp:          24.6,
-			MinTemp:          19.5,
+			WindSpeed:        hkodata.NewSpeed(24),
+			MaxTemp:          hkodata.NewTemperature(24.6),
+			MinTemp:          hkodata.NewTemperature(19.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("cch"),
 			ShortName:        "cch",
-			CurrentTemp:      22.0,
-			RelativeHumidity: .68,
+			CurrentTemp:      hkodata.NewTemperature(22.0),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.68),
 			WindDirection:    "SE",
-			WindSpeed:        30,
-			MaxTemp:          22.0,
-			MinTemp:          18.4,
+			WindSpeed:        hkodata.NewSpeed(30),
+			MaxTemp:          hkodata.NewTemperature(22.0),
+			MinTemp:          hkodata.NewTemperature(18.4),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("hpv"),
 			ShortName:        "hpv",
-			CurrentTemp:      23.1,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(23.1),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          23.1,
-			MinTemp:          17.1,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(23.1),
+			MinTemp:          hkodata.NewTemperature(17.1),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("hko"),
 			ShortName:        "hko",
-			CurrentTemp:      20.8,
-			RelativeHumidity: .74,
+			CurrentTemp:      hkodata.NewTemperature(20.8),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.74),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          20.8,
-			MinTemp:          18.5,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(20.8),
+			MinTemp:          hkodata.NewTemperature(18.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("hkp"),
 			ShortName:        "hkp",
-			CurrentTemp:      21.6,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(21.6),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          21.6,
-			MinTemp:          17.5,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(21.6),
+			MinTemp:          hkodata.NewTemperature(17.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("se1"),
 			ShortName:        "se1",
-			CurrentTemp:      21.8,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(21.8),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.5,
-			MinTemp:          19.0,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.5),
+			MinTemp:          hkodata.NewTemperature(19.0),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ksc"),
 			ShortName:        "ksc",
-			CurrentTemp:      22.2,
-			RelativeHumidity: .66,
+			CurrentTemp:      hkodata.NewTemperature(22.2),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.66),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.2,
-			MinTemp:          15.5,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.2),
+			MinTemp:          hkodata.NewTemperature(15.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("kp"),
 			ShortName:        "kp",
-			CurrentTemp:      21.7,
-			RelativeHumidity: .66,
+			CurrentTemp:      hkodata.NewTemperature(21.7),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.66),
 			WindDirection:    "SE",
-			WindSpeed:        9,
-			MaxTemp:          21.8,
-			MinTemp:          17.7,
+			WindSpeed:        hkodata.NewSpeed(9),
+			MaxTemp:          hkodata.NewTemperature(21.8),
+			MinTemp:          hkodata.NewTemperature(17.7),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("klt"),
 			ShortName:        "klt",
-			CurrentTemp:      22.5,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(22.5),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          23.2,
-			MinTemp:          17.8,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(23.2),
+			MinTemp:          hkodata.NewTemperature(17.8),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ktg"),
 			ShortName:        "ktg",
-			CurrentTemp:      21.9,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(21.9),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.0,
-			MinTemp:          18.4,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.0),
+			MinTemp:          hkodata.NewTemperature(18.4),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("lfs"),
 			ShortName:        "lfs",
-			CurrentTemp:      23.8,
-			RelativeHumidity: .62,
+			CurrentTemp:      hkodata.NewTemperature(23.8),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.62),
 			WindDirection:    "SE",
-			WindSpeed:        8,
-			MaxTemp:          23.8,
-			MinTemp:          15.9,
+			WindSpeed:        hkodata.NewSpeed(8),
+			MaxTemp:          hkodata.NewTemperature(23.8),
+			MinTemp:          hkodata.NewTemperature(15.9),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ngp"),
 			ShortName:        "ngp",
-			CurrentTemp:      19.3,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(19.3),
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        39,
-			MaxTemp:          20.1,
-			MinTemp:          17.5,
+			WindSpeed:        hkodata.NewSpeed(39),
+			MaxTemp:          hkodata.NewTemperature(20.1),
+			MinTemp:          hkodata.NewTemperature(17.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tyw"),
 			ShortName:        "tyw",
-			CurrentTemp:      22.4,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(22.4),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.4,
-			MinTemp:          12.4,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.4),
+			MinTemp:          hkodata.NewTemperature(12.4),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("pen"),
 			ShortName:        "pen",
-			CurrentTemp:      21.8,
-			RelativeHumidity: .72,
+			CurrentTemp:      hkodata.NewTemperature(21.8),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.72),
 			WindDirection:    "NE",
-			WindSpeed:        18,
-			MaxTemp:          21.8,
-			MinTemp:          18.7,
+			WindSpeed:        hkodata.NewSpeed(18),
+			MaxTemp:          hkodata.NewTemperature(21.8),
+			MinTemp:          hkodata.NewTemperature(18.7),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("skg"),
 			ShortName:        "skg",
-			CurrentTemp:      20.6,
-			RelativeHumidity: .72,
+			CurrentTemp:      hkodata.NewTemperature(20.6),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.72),
 			WindDirection:    "SE",
-			WindSpeed:        8,
-			MaxTemp:          20.6,
-			MinTemp:          16.6,
+			WindSpeed:        hkodata.NewSpeed(8),
+			MaxTemp:          hkodata.NewTemperature(20.6),
+			MinTemp:          hkodata.NewTemperature(16.6),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ssp"),
 			ShortName:        "ssp",
-			CurrentTemp:      24.1,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(24.1),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          24.3,
-			MinTemp:          18.0,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(24.3),
+			MinTemp:          hkodata.NewTemperature(18.0),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("sha"),
 			ShortName:        "sha",
-			CurrentTemp:      22.9,
-			RelativeHumidity: .59,
+			CurrentTemp:      hkodata.NewTemperature(22.9),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.59),
 			WindDirection:    "SE",
-			WindSpeed:        5,
-			MaxTemp:          23.0,
-			MinTemp:          15.8,
+			WindSpeed:        hkodata.NewSpeed(5),
+			MaxTemp:          hkodata.NewTemperature(23.0),
+			MinTemp:          hkodata.NewTemperature(15.8),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("skw"),
 			ShortName:        "skw",
-			CurrentTemp:      21.2,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(21.2),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          21.7,
-			MinTemp:          17.9,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(21.7),
+			MinTemp:          hkodata.NewTemperature(17.9),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("sek"),
 			ShortName:        "sek",
-			CurrentTemp:      22.9,
-			RelativeHumidity: .63,
+			CurrentTemp:      hkodata.NewTemperature(22.9),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.63),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.9,
-			MinTemp:          15.4,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.9),
+			MinTemp:          hkodata.NewTemperature(15.4),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ssh"),
 			ShortName:        "ssh",
-			CurrentTemp:      21.1,
-			RelativeHumidity: .70,
+			CurrentTemp:      hkodata.NewTemperature(21.1),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.70),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          21.1,
-			MinTemp:          16.1,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(21.1),
+			MinTemp:          hkodata.NewTemperature(16.1),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("sty"),
 			ShortName:        "sty",
-			CurrentTemp:      20.6,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(20.6),
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        20,
-			MaxTemp:          20.7,
-			MinTemp:          18.6,
+			WindSpeed:        hkodata.NewSpeed(20),
+			MaxTemp:          hkodata.NewTemperature(20.7),
+			MinTemp:          hkodata.NewTemperature(18.6),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tkl"),
 			ShortName:        "tkl",
-			CurrentTemp:      21.9,
-			RelativeHumidity: .65,
+			CurrentTemp:      hkodata.NewTemperature(21.9),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.65),
 			WindDirection:    "E",
-			WindSpeed:        10,
-			MaxTemp:          21.9,
-			MinTemp:          15.0,
+			WindSpeed:        hkodata.NewSpeed(10),
+			MaxTemp:          hkodata.NewTemperature(21.9),
+			MinTemp:          hkodata.NewTemperature(15.0),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tms"),
 			ShortName:        "tms",
-			CurrentTemp:      16.4,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(16.4),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          17.0,
-			MinTemp:          12.6,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(17.0),
+			MinTemp:          hkodata.NewTemperature(12.6),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tpo"),
 			ShortName:        "tpo",
-			CurrentTemp:      22.9,
-			RelativeHumidity: .68,
+			CurrentTemp:      hkodata.NewTemperature(22.9),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.68),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.9,
-			MinTemp:          16.7,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.9),
+			MinTemp:          hkodata.NewTemperature(16.7),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("vp1"),
 			ShortName:        "vp1",
-			CurrentTemp:      20.4,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(20.4),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          20.4,
-			MinTemp:          15.5,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(20.4),
+			MinTemp:          hkodata.NewTemperature(15.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("jkb"),
 			ShortName:        "jkb",
-			CurrentTemp:      22.3,
-			RelativeHumidity: .67,
+			CurrentTemp:      hkodata.NewTemperature(22.3),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.67),
 			WindDirection:    "E",
-			WindSpeed:        8,
-			MaxTemp:          22.6,
-			MinTemp:          17.0,
+			WindSpeed:        hkodata.NewSpeed(8),
+			MaxTemp:          hkodata.NewTemperature(22.6),
+			MinTemp:          hkodata.NewTemperature(17.0),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ty1"),
 			ShortName:        "ty1",
-			CurrentTemp:      22.1,
-			RelativeHumidity: .61,
+			CurrentTemp:      hkodata.NewTemperature(22.1),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.61),
 			WindDirection:    "E",
-			WindSpeed:        8,
-			MaxTemp:          22.1,
-			MinTemp:          16.6,
+			WindSpeed:        hkodata.NewSpeed(8),
+			MaxTemp:          hkodata.NewTemperature(22.1),
+			MinTemp:          hkodata.NewTemperature(16.6),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("twn"),
 			ShortName:        "twn",
-			CurrentTemp:      21.9,
-			RelativeHumidity: .64,
+			CurrentTemp:      hkodata.NewTemperature(21.9),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.64),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          21.9,
-			MinTemp:          16.1,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(21.9),
+			MinTemp:          hkodata.NewTemperature(16.1),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tw"),
 			ShortName:        "tw",
-			CurrentTemp:      22.8,
-			RelativeHumidity: .63,
+			CurrentTemp:      hkodata.NewTemperature(22.8),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.63),
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          22.8,
-			MinTemp:          17.6,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(22.8),
+			MinTemp:          hkodata.NewTemperature(17.6),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tun"),
 			ShortName:        "tun",
-			CurrentTemp:      23.8,
-			RelativeHumidity: .58,
+			CurrentTemp:      hkodata.NewTemperature(23.8),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.58),
 			WindDirection:    "S",
-			WindSpeed:        8,
-			MaxTemp:          24.3,
-			MinTemp:          17.9,
+			WindSpeed:        hkodata.NewSpeed(8),
+			MaxTemp:          hkodata.NewTemperature(24.3),
+			MinTemp:          hkodata.NewTemperature(17.9),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("wgl"),
 			ShortName:        "wgl",
-			CurrentTemp:      22.4,
-			RelativeHumidity: .72,
+			CurrentTemp:      hkodata.NewTemperature(22.4),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.72),
 			WindDirection:    "E",
-			WindSpeed:        23,
-			MaxTemp:          22.7,
-			MinTemp:          18.6,
+			WindSpeed:        hkodata.NewSpeed(23),
+			MaxTemp:          hkodata.NewTemperature(22.7),
+			MinTemp:          hkodata.NewTemperature(18.6),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("wlp"),
 			ShortName:        "wlp",
-			CurrentTemp:      23.6,
-			RelativeHumidity: .59,
+			CurrentTemp:      hkodata.NewTemperature(23.6),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.59),
 			WindDirection:    "NE",
-			WindSpeed:        6,
-			MaxTemp:          24.0,
-			MinTemp:          15.3,
+			WindSpeed:        hkodata.NewSpeed(6),
+			MaxTemp:          hkodata.NewTemperature(24.0),
+			MinTemp:          hkodata.NewTemperature(15.3),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("hks"),
 			ShortName:        "hks",
-			CurrentTemp:      22.3,
-			RelativeHumidity: .62,
+			CurrentTemp:      hkodata.NewTemperature(22.3),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.62),
 			WindDirection:    "NE",
-			WindSpeed:        14,
-			MaxTemp:          22.3,
-			MinTemp:          17.2,
+			WindSpeed:        hkodata.NewSpeed(14),
+			MaxTemp:          hkodata.NewTemperature(22.3),
+			MinTemp:          hkodata.NewTemperature(17.2),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("wts"),
 			ShortName:        "wts",
-			CurrentTemp:      23.6,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(23.6),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          23.6,
-			MinTemp:          17.5,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(23.6),
+			MinTemp:          hkodata.NewTemperature(17.5),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("ylp"),
 			ShortName:        "ylp",
-			CurrentTemp:      23.8,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(23.8),
+			RelativeHumidity: nil,
 			WindDirection:    "",
-			WindSpeed:        0,
-			MaxTemp:          23.8,
-			MinTemp:          15.1,
+			WindSpeed:        nil,
+			MaxTemp:          hkodata.NewTemperature(23.8),
+			MinTemp:          hkodata.NewTemperature(15.1),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tc"),
 			ShortName:        "tc",
-			CurrentTemp:      17.5,
-			RelativeHumidity: 0,
+			CurrentTemp:      hkodata.NewTemperature(17.5),
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        28,
-			MaxTemp:          17.6,
-			MinTemp:          14.0,
+			WindSpeed:        hkodata.NewSpeed(28),
+			MaxTemp:          hkodata.NewTemperature(17.6),
+			MinTemp:          hkodata.NewTemperature(14.0),
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("gi"),
 			ShortName:        "gi",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "NE",
-			WindSpeed:        29,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(29),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("se"),
 			ShortName:        "se",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        17,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(17),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("sc"),
 			ShortName:        "sc",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        18,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(18),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("sf"),
 			ShortName:        "sf",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        16,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(16),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("plc"),
 			ShortName:        "plc",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        11,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(11),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tpk"),
 			ShortName:        "tpk",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "E",
-			WindSpeed:        11,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(11),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 		hkodata.Region{
 			Name:             hkodata.RegionName("tap"),
 			ShortName:        "tap",
-			CurrentTemp:      0,
-			RelativeHumidity: 0,
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
 			WindDirection:    "SE",
-			WindSpeed:        20,
-			MaxTemp:          0,
-			MinTemp:          0,
+			WindSpeed:        hkodata.NewSpeed(20),
+			MaxTemp:          nil,
+			MinTemp:          nil,
 		},
 	}
 
 	for i := 0; i < len(expected); i++ {
-		if want, have := expected[i], regions.Regions[i]; want != have {
-			t.Errorf("\nexpected: %#v\n     got: %#v", want, have)
+
+		// log the json results
+		bytes, _ := json.Marshal(regions.Regions[i])
+		t.Logf("json.regions[%d]: %s", i, bytes)
+
+		// compare values
+		if want, have := expected[i], regions.Regions[i]; !reflect.DeepEqual(want, have) {
+			t.Errorf("unexpected difference in %#v / %#v (want != have)", want.ShortName, want.Name.Zh)
+			for _, desc := range pretty.Diff(want, have) {
+				t.Log("\tregion." + desc)
+			}
 		}
+
+		// check if name actually found
 		// special case: se1 has no name
 		if regions.Regions[i].ShortName != "se1" {
 			if regions.Regions[i].Name.En == "" {
@@ -466,12 +480,114 @@ func TestDecodeRegionJSON(t *testing.T) {
 				t.Errorf("The Chinese name of %#v is empty string", regions.Regions[i].ShortName)
 			}
 		}
+
+		// check if empty json name for se1
+		if regions.Regions[i].ShortName == "se1" {
+			bytes, err := json.Marshal(regions.Regions[i].Name)
+			if err != nil {
+				t.Errorf("unexpected error: %s", err.Error())
+			}
+			if want, have := "{}", string(bytes); want != have {
+				t.Errorf("\nexpected: %s\n     got: %s", want, have)
+			}
+		}
 	}
 
-	/*
-		// TODO: make sure empty windspeed / wind direction / relative humidity are
-		// omitted in JSON
-		data, _ := json.Marshal(regions.Regions)
-		t.Logf("json: %s", data)
-	*/
+}
+
+func TestDecodeRegionJSON_dummyCase(t *testing.T) {
+
+	file, err := os.Open("./test/region_json.dummy.xml")
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err.Error())
+	}
+	defer file.Close()
+
+	regions, err := hkodata.DecodeRegionJSON(file)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err.Error())
+	}
+	if want, have := time.Date(2016, time.December, 19, 10, 20, 0, 0, hkodata.HKT), regions.PubDate; !want.Equal(have) {
+		t.Errorf("expected %s, got %s", want, have)
+	}
+
+	expected := []hkodata.Region{
+		hkodata.Region{
+			Name:             hkodata.RegionName("hka"),
+			ShortName:        "hka",
+			CurrentTemp:      hkodata.NewTemperature(24.1),
+			RelativeHumidity: hkodata.NewRelativeHumidity(.54),
+			WindDirection:    "E",
+			WindSpeed:        hkodata.NewSpeed(24),
+			MaxTemp:          hkodata.NewTemperature(24.6),
+			MinTemp:          hkodata.NewTemperature(19.5),
+		},
+		hkodata.Region{
+			Name:             hkodata.RegionName("cch"),
+			ShortName:        "cch",
+			CurrentTemp:      hkodata.NewTemperature(0),
+			RelativeHumidity: hkodata.NewRelativeHumidity(0),
+			WindDirection:    "SE",
+			WindSpeed:        hkodata.NewSpeed(0),
+			MaxTemp:          hkodata.NewTemperature(0),
+			MinTemp:          hkodata.NewTemperature(0),
+		},
+		hkodata.Region{
+			Name:             hkodata.RegionName("hpv"),
+			ShortName:        "hpv",
+			CurrentTemp:      nil,
+			RelativeHumidity: nil,
+			WindDirection:    "",
+			WindSpeed:        nil,
+			MaxTemp:          nil,
+			MinTemp:          nil,
+		},
+		hkodata.Region{
+			Name:             hkodata.RegionName("hks"),
+			ShortName:        "hks",
+			CurrentTemp:      hkodata.NewTemperature(-10),
+			RelativeHumidity: hkodata.NewRelativeHumidity(-.1),
+			WindDirection:    "",
+			WindSpeed:        hkodata.NewSpeed(-10),
+			MaxTemp:          hkodata.NewTemperature(-10),
+			MinTemp:          hkodata.NewTemperature(-10),
+		},
+	}
+
+	for i := 0; i < len(expected); i++ {
+		// log the json results
+		bytes, _ := json.Marshal(regions.Regions[i])
+		t.Logf("json.regions[%d]: %s", i, bytes)
+
+		// compare values
+		if want, have := expected[i], regions.Regions[i]; !reflect.DeepEqual(want, have) {
+			t.Errorf("unexpected difference in %#v / %#v (want != have)", want.ShortName, want.Name.Zh)
+			for _, desc := range pretty.Diff(want, have) {
+				t.Log("\tregion." + desc)
+			}
+		}
+
+		// check if name actually found
+		// special case: se1 has no name
+		if regions.Regions[i].ShortName != "se1" {
+			if regions.Regions[i].Name.En == "" {
+				t.Errorf("The English name of %#v is empty string", regions.Regions[i].ShortName)
+			}
+			if regions.Regions[i].Name.Zh == "" {
+				t.Errorf("The Chinese name of %#v is empty string", regions.Regions[i].ShortName)
+			}
+		}
+
+		// check if empty json name for se1
+		if regions.Regions[i].ShortName == "se1" {
+			bytes, err := json.Marshal(regions.Regions[i].Name)
+			if err != nil {
+				t.Errorf("unexpected error: %s", err.Error())
+			}
+			if want, have := "{}", string(bytes); want != have {
+				t.Errorf("\nexpected: %s\n     got: %s", want, have)
+			}
+		}
+	}
+
 }

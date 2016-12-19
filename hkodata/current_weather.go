@@ -23,9 +23,30 @@ func init() {
 // Temperature contains Temperature in degree celcius
 type Temperature float64
 
+// NewTemperature generates a pointer to Temperature value
+func NewTemperature(num float64) *Temperature {
+	val := Temperature(num)
+	return &val
+}
+
 // RelativeHumidity contains data of relative humidity
 // (0.5 = 50%)
 type RelativeHumidity float64
+
+// NewRelativeHumidity generates a pointer to RelativeHumidity value
+func NewRelativeHumidity(num float64) *RelativeHumidity {
+	val := RelativeHumidity(num)
+	return &val
+}
+
+// Speed contains float number of speed in km/h
+type Speed float64
+
+// NewSpeed generates a pointer to Speed value
+func NewSpeed(num float64) *Speed {
+	val := Speed(num)
+	return &val
+}
 
 // DistrictsTemperature contains Temperature of different districts in HK
 type DistrictsTemperature struct {

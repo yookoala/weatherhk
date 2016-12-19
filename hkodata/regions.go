@@ -2,6 +2,7 @@ package hkodata
 
 import (
 	"io"
+	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -216,9 +217,16 @@ func init() {
 	typ := reflect.TypeOf(Region{})
 	regionDataFields = make(map[string]reflectField)
 	for i, numField := 0, typ.NumField(); i < numField; i++ {
-		regionDataFields[typ.Field(i).Tag.Get("hkodata")] = reflectField{
-			Index: i,
-			Type:  typ.Field(i).Type.Name(),
+		if typ.Field(i).Type.Kind() != reflect.Ptr {
+			regionDataFields[typ.Field(i).Tag.Get("hkodata")] = reflectField{
+				Index: i,
+				Type:  typ.Field(i).Type.Name(),
+			}
+		} else {
+			regionDataFields[typ.Field(i).Tag.Get("hkodata")] = reflectField{
+				Index: i,
+				Type:  "*" + typ.Field(i).Type.Elem().Name(),
+			}
 		}
 	}
 }
@@ -226,14 +234,14 @@ func init() {
 // Region represents data of a region from HKO non-public API endpoint
 // `region_json.xml`
 type Region struct {
-	Name             I18nName         `hkodata:"-"`
-	ShortName        string           `hkodata:"region"`
-	CurrentTemp      Temperature      `hkodata:"temp"`
-	RelativeHumidity RelativeHumidity `hkodata:"rh" json:"RelativeHumidity,omitempty"`
-	WindDirection    string           `hkodata:"wind" json:"WindDirection,omitempty"`
-	WindSpeed        float64          `hkodata:"speed" json:"WindSpeed,omitempty"`
-	MaxTemp          Temperature      `hkodata:"maxtemp"`
-	MinTemp          Temperature      `hkodata:"mintemp"`
+	Name             I18nName          `hkodata:"-"`
+	ShortName        string            `hkodata:"region"`
+	CurrentTemp      *Temperature      `hkodata:"temp" json:"CurrentTemp,omitempty"`
+	RelativeHumidity *RelativeHumidity `hkodata:"rh" json:"RelativeHumidity,omitempty"`
+	WindDirection    string            `hkodata:"wind" json:"WindDirection,omitempty"`
+	WindSpeed        *Speed            `hkodata:"speed" json:"WindSpeed,omitempty"`
+	MaxTemp          *Temperature      `hkodata:"maxtemp" json:"MaxTemp,omitempty"`
+	MinTemp          *Temperature      `hkodata:"mintemp" json:"MinTemp,omitempty"`
 }
 
 // Regions represents data from HKO non-public API endpoint `region_json.xml`
@@ -271,18 +279,23 @@ func DecodeRegionJSON(r io.Reader) (regions *Regions, err error) {
 			fieldName := fieldNames[j]
 
 			if structFieldDef, ok := regionDataFields[fieldName]; ok {
-				switch structFieldDef.Type {
-				case "Temperature":
-					val, _ := strconv.ParseFloat(fields[j], 64)
-					regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(Temperature(val)))
-				case "RelativeHumidity":
-					val, _ := strconv.ParseFloat(fields[j], 64)
-					regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(RelativeHumidity(val / 100)))
-				case "float64":
-					val, _ := strconv.ParseFloat(fields[j], 64)
-					regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(val))
-				case "string":
-					regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(fields[j]))
+				if fields[j] != "" {
+					switch structFieldDef.Type {
+					case "*Temperature":
+						val, _ := strconv.ParseFloat(fields[j], 64)
+						regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(NewTemperature(val)))
+					case "*RelativeHumidity":
+						val, _ := strconv.ParseFloat(fields[j], 64)
+						regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(NewRelativeHumidity(val / 100)))
+					case "*Speed":
+						val, _ := strconv.ParseFloat(fields[j], 64)
+						regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(NewSpeed(val)))
+					case "string":
+						regionVal.Field(structFieldDef.Index).Set(reflect.ValueOf(fields[j]))
+					default:
+						// note: should not be running here
+						log.Printf("unhandled type: %s", structFieldDef.Type)
+					}
 				}
 			}
 		}
