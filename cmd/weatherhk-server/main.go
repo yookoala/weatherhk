@@ -68,7 +68,7 @@ func main() {
 	})
 
 	r.HandleFunc("/api/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 		requestID := r.Header.Get("X-Request-ID")
 
@@ -116,7 +116,7 @@ func main() {
 	})
 
 	r.HandleFunc("/api/region.json", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 		requestID := r.Header.Get("X-Request-ID")
 		source := "http://www.hko.gov.hk/wxinfo/json/region_json.xml"
