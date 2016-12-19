@@ -30,7 +30,7 @@ func TestCurrentWeather(t *testing.T) {
 	if want, have := hkodata.Temperature(18), cw.AirTemperature; want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
-	if want, have := float64(0.71), cw.RelativeHumidity; want != have {
+	if want, have := hkodata.RelativeHumidity(0.71), cw.RelativeHumidity; want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 	if want, have := hkodata.Temperature(18), cw.DistrictsTemperature.HongKongObservatory; want != have {

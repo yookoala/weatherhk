@@ -20,7 +20,11 @@ func init() {
 }
 
 // Temperature contains Temperature in degree celcius
-type Temperature int
+type Temperature float64
+
+// RelativeHumidity contains data of relative humidity
+// (0.5 = 50%)
+type RelativeHumidity float64
 
 // DistrictsTemperature contains Temperature of different districts in HK
 type DistrictsTemperature struct {
@@ -55,7 +59,7 @@ type DistrictsTemperature struct {
 type CurrentWeather struct {
 	PubDate              time.Time
 	AirTemperature       Temperature
-	RelativeHumidity     float64
+	RelativeHumidity     RelativeHumidity
 	DistrictsTemperature DistrictsTemperature
 	Raw                  string `json:"-"`
 }
@@ -126,7 +130,7 @@ func DecodeCurrentWeather(r io.Reader) (data *CurrentWeather, err error) {
 
 		field := distTempVal.FieldByName(district)
 		submatches := reDegree.FindStringSubmatch(text2)
-		degree, err := strconv.ParseInt(submatches[1], 10, 32)
+		degree, err := strconv.ParseFloat(submatches[1], 64)
 		if err != nil {
 			parseErrors = append(parseErrors, fmt.Errorf("[Error] unidentified degree number in string: %s (in %#v, district: %s)", submatches[1], text2, district))
 			return
@@ -140,14 +144,14 @@ func DecodeCurrentWeather(r io.Reader) (data *CurrentWeather, err error) {
 	descText := doc.Text()
 	reAirTemp := regexp.MustCompile(`Air temperature\s*:\s*(\d+)\s+(degree|degrees) Celsius`)
 	airTempStr := reAirTemp.FindStringSubmatch(descText)
-	airTemp, _ := strconv.ParseInt(airTempStr[1], 10, 32)
+	airTemp, _ := strconv.ParseFloat(airTempStr[1], 64)
 	data.AirTemperature = Temperature(airTemp)
 
 	// parse humidity
 	reHumidity := regexp.MustCompile(`Relative Humidity\s*:\s*(\d+)\s+per cent`)
 	humidityStr := reHumidity.FindStringSubmatch(descText)
 	humidity, _ := strconv.ParseFloat(humidityStr[1], 64)
-	data.RelativeHumidity = humidity / 100
+	data.RelativeHumidity = RelativeHumidity(humidity / 100)
 
 	return
 }
