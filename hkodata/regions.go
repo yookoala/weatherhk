@@ -253,7 +253,7 @@ type Regions struct {
 
 // Expires implements Expirer interface
 func (regions Regions) Expires() time.Time {
-	return regions.PubDate.Add(20 * time.Minute)
+	return regions.PubDate.Add(10 * time.Minute)
 }
 
 // DecodeRegionJSON decodes non-public API endpoint `region_json.xml` of

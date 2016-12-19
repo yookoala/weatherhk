@@ -93,8 +93,9 @@ type CurrentWeather struct {
 }
 
 // Expires implements Expirer interface
+// (seems to be generated every hour, thou not necessary at :00)
 func (currentWeather CurrentWeather) Expires() time.Time {
-	return currentWeather.PubDate.Add(2 * time.Minute)
+	return currentWeather.PubDate.Add(60 * time.Minute)
 }
 
 // ParseError contains all error in parsing
