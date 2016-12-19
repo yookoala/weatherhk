@@ -39,38 +39,35 @@ func init() {
 
 }
 
-func enforceHTTPS(w http.ResponseWriter, r *http.Request) bool {
-	log.Printf("X-Forwarded-Proto %s", r.Header.Get("X-Forwarded-Proto"))
-	if forceHTTPS && r.Header.Get("X-Forwarded-Proto") != "https" {
-		redirectURL := *r.URL
-		redirectURL.Host = hostname
-		redirectURL.Scheme = "https"
-		log.Printf("run here: %s", redirectURL)
+// enforceHTTPS is a simple middleware to enforce HTTPS on demand
+func enforceHTTPS(forceHTTPS bool, inner http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if forceHTTPS && r.Header.Get("X-Forwarded-Proto") != "https" {
+			redirectURL := *r.URL
+			redirectURL.Host = hostname
+			redirectURL.Scheme = "https"
+			log.Printf("run here: %s", redirectURL)
 
-		w.Header().Set("Location", redirectURL.String())
-		w.WriteHeader(http.StatusMovedPermanently)
-		return true
+			w.Header().Set("Location", redirectURL.String())
+			w.WriteHeader(http.StatusMovedPermanently)
+			return
+		}
+
+		// pass through to inner handler
+		inner.ServeHTTP(w, r)
 	}
-	return false
 }
 
 func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if enforceHTTPS(w, r) {
-			return
-		}
 		w.Header().Add("Content-Type", "text/html; charset=utf8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `<html><h1>Simple Hong Kong Weather API</h1><ul><li><a href="/api/CurrentWeather.json">Current Weather</a></li><li><a href="/api/region.json">Region Weather</a></li></ul></html>`)
 	})
 
 	r.HandleFunc("/api/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
-		if enforceHTTPS(w, r) {
-			return
-		}
-
 		w.Header().Set("Content-Type", "application/json")
 
 		requestID := r.Header.Get("X-Request-ID")
@@ -119,11 +116,6 @@ func main() {
 	})
 
 	r.HandleFunc("/api/region.json", func(w http.ResponseWriter, r *http.Request) {
-
-		if enforceHTTPS(w, r) {
-			return
-		}
-
 		w.Header().Set("Content-Type", "application/json")
 
 		requestID := r.Header.Get("X-Request-ID")
@@ -175,5 +167,5 @@ func main() {
 	})
 
 	log.Printf("listen at port %d", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), r)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), enforceHTTPS(forceHTTPS, r))
 }
