@@ -20,6 +20,12 @@ func init() {
 	HKT, _ = time.LoadLocation("Asia/Hong_Kong")
 }
 
+// Expirer interface describes things that can expire
+type Expirer interface {
+	// Expires return the expiration time of the entity
+	Expires() time.Time
+}
+
 // Temperature contains Temperature in degree celcius
 type Temperature float64
 
@@ -84,6 +90,11 @@ type CurrentWeather struct {
 	RelativeHumidity     RelativeHumidity
 	DistrictsTemperature DistrictsTemperature
 	Raw                  string `json:"-"`
+}
+
+// Expires implements Expirer interface
+func (currentWeather CurrentWeather) Expires() time.Time {
+	return currentWeather.PubDate.Add(2 * time.Minute)
 }
 
 // ParseError contains all error in parsing
