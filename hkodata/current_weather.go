@@ -13,6 +13,7 @@ import (
 	"github.com/mmcdole/gofeed/rss"
 )
 
+// HKT stores *time.Location of Hong Kong timezone
 var HKT *time.Location
 
 func init() {
@@ -64,8 +65,10 @@ type CurrentWeather struct {
 	Raw                  string `json:"-"`
 }
 
+// ParseError contains all error in parsing
 type ParseError []error
 
+// Error implements error interface
 func (errs ParseError) Error() (msg string) {
 	if len(errs) == 0 {
 		return ""
@@ -78,6 +81,7 @@ func (errs ParseError) Error() (msg string) {
 	return
 }
 
+// DecodeCurrentWeather decodes core content in the CurrentWeather.xml report
 func DecodeCurrentWeather(r io.Reader) (data *CurrentWeather, err error) {
 
 	// parse the content as RSS feed

@@ -9,6 +9,7 @@ import (
 	"github.com/go-restit/lzjson"
 )
 
+// I18nName contains names of different languages
 type I18nName struct {
 	Zh string `json:"zh_hk"`
 	En string `json:"en"`
