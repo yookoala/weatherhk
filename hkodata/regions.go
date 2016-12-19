@@ -1,7 +1,6 @@
 package hkodata
 
 import (
-	"encoding/json"
 	"io"
 	"reflect"
 	"strconv"
@@ -13,14 +12,6 @@ import (
 type I18nName struct {
 	Zh string `json:"zh_hk"`
 	En string `json:"en"`
-}
-
-// MarshalJSON implements encoding/json.Marshaler
-func (name I18nName) MarshalJSON() ([]byte, error) {
-	if name.Zh == "" && name.En == "" {
-		return []byte("{}"), nil
-	}
-	return json.Marshal(name)
 }
 
 var regionNames map[string]I18nName

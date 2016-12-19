@@ -17,6 +17,8 @@ var port int
 var forceHTTPS bool
 var hostname string
 
+const noticeNonpublicAPI = "This source is not publicly announced by HKO. That means it can break without previous notice."
+
 func init() {
 	portStr := os.Getenv("PORT")
 	if portStr != "" {
@@ -61,7 +63,7 @@ func main() {
 		}
 		w.Header().Add("Content-Type", "text/html; charset=utf8")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `<html><h1>Simple Hong Kong Weather API</h1><a href="/api/CurrentWeather.json">Current Weather</a></html>`)
+		fmt.Fprintf(w, `<html><h1>Simple Hong Kong Weather API</h1><ul><li><a href="/api/CurrentWeather.json">Current Weather</a></li><li><a href="/api/region.json">Region Weather</a></li></ul></html>`)
 	})
 
 	r.HandleFunc("/api/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
@@ -114,6 +116,62 @@ func main() {
 			RSS:    "http://rss.weather.gov.hk/rss/CurrentWeather.xml",
 			// Raw:    data.Raw,
 		})
+	})
+
+	r.HandleFunc("/api/region.json", func(w http.ResponseWriter, r *http.Request) {
+
+		if enforceHTTPS(w, r) {
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		requestID := r.Header.Get("X-Request-ID")
+		source := "http://www.hko.gov.hk/wxinfo/json/region_json.xml"
+
+		req, err := http.Get(source)
+		if err != nil {
+			log.Printf("request-id: %s, err: %s", requestID, err.Error())
+			return
+		}
+
+		// prepare encoder for output
+		enc := json.NewEncoder(w)
+
+		// decode the RSS
+		data, err := hkodata.DecodeRegionJSON(req.Body)
+		if err != nil {
+			log.Printf("request-id: %s, err: %s", requestID, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			enc.Encode(struct {
+				Status  int    `json:"status"`
+				Message string `json:"message"`
+				Source  string `json:"source"`
+			}{
+				Status:  http.StatusInternalServerError,
+				Message: err.Error(),
+				Source:  source,
+			})
+			return
+		}
+
+		w.Header().Set("Last-Modified", data.PubDate.Format(time.RFC1123))
+		w.WriteHeader(http.StatusOK)
+
+		enc.Encode(struct {
+			Status int             `json:"status"`
+			Data   hkodata.Regions `json:"data"`
+			Source string          `json:"source"`
+			Notice string          `json:"notice"`
+			// Raw    string                 `json:"raw_data"`
+		}{
+			Status: http.StatusOK,
+			Data:   *data,
+			Source: source,
+			Notice: noticeNonpublicAPI,
+			// Raw:    data.Raw,
+		})
+
 	})
 
 	log.Printf("listen at port %d", port)
