@@ -12,8 +12,8 @@ import (
 
 // I18nName contains names of different languages
 type I18nName struct {
-	Zh string `json:"zh_hk"`
-	En string `json:"en"`
+	Zh string `json:"zh_HK,omitempty"`
+	En string `json:"en,omitempty"`
 }
 
 var regionNames map[string]I18nName
