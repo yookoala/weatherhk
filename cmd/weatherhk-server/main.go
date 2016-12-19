@@ -18,6 +18,7 @@ var forceHTTPS bool
 var hostname string
 
 const noticeNonpublicAPI = "This source is not publicly announced by HKO. That means it can break without previous notice."
+const fmtRFC2612 = "Mon, 02 Jan 2006 15:04:05 GMT"
 
 func init() {
 	portStr := os.Getenv("PORT")
@@ -56,6 +57,13 @@ func enforceHTTPS(forceHTTPS bool, inner http.Handler) http.HandlerFunc {
 		// pass through to inner handler
 		inner.ServeHTTP(w, r)
 	}
+}
+
+func rfc2616(t time.Time) string {
+	// RFC2616: Tue, 15 Nov 1994 12:45:26 GMT
+	// RFC1123: Mon, 02 Jan 2006 15:04:05 MST
+	//t.In(time.UTC).Format("Mon, 02 Jan 2006 15:04:05 MST")
+	return t.In(time.UTC).Format(fmtRFC2612)
 }
 
 func main() {
@@ -150,10 +158,12 @@ func main() {
 			return
 		}
 
-		// RFC2616: Tue, 15 Nov 1994 12:45:26 GMT
-		// RFC1123: Mon, 02 Jan 2006 15:04:05 MST
-		w.Header().Set("Last-Modified", data.PubDate.In(time.UTC).Format(time.RFC1123))
-		w.Header().Set("Expires", data.Expires().In(time.UTC).Format(time.RFC1123))
+		// TODO: properly handle If-Modified-Since request
+		// TODO: properly generate ETag
+
+		w.Header().Set("Last-Modified", rfc2616(data.PubDate))
+		w.Header().Set("Expires", rfc2616(data.Expires()))
+		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", 60*10))
 		w.WriteHeader(http.StatusOK)
 
 		enc.Encode(struct {
