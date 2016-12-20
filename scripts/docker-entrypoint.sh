@@ -2,11 +2,11 @@
 
 case $1 in
 
-  "test" )
-    go test -v -cover ./...
+  "test")
+    go "$@"
     ;;
 
-  "*" )
+  *)
     weatherhk-server "$@"
     ;;
 
