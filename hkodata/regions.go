@@ -263,7 +263,7 @@ func DecodeRegionJSON(r io.Reader) (regions *Regions, err error) {
 	regions.Regions = make([]Region, 0, 20)
 
 	json := lzjson.Decode(r)
-	regions.PubDate, _ = time.Parse("200601021504MST", json.Get("btime").String()+"HKT")
+	regions.PubDate, _ = time.Parse("200601021504-0700", json.Get("btime").String()+"+0800")
 
 	// parse the field names from JSON
 	var fieldNames []string
