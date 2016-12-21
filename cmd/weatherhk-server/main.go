@@ -66,6 +66,17 @@ func rfc2616(t time.Time) string {
 	return t.In(time.UTC).Format(fmtRFC2612)
 }
 
+func maxAge(expires time.Time) (maxAge int) {
+	maxAge = int(expires.Sub(time.Now()) / time.Second)
+
+	// force the max-age to be larger than 5 minutes
+	// if already expired (as grace period)
+	if maxAge < 0 {
+		maxAge = 5 * 60
+	}
+	return
+}
+
 func main() {
 	r := mux.NewRouter()
 
@@ -111,7 +122,7 @@ func main() {
 
 		w.Header().Set("Last-Modified", rfc2616(data.PubDate))
 		w.Header().Set("Expires", rfc2616(data.Expires()))
-		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", 60*10))
+		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge(data.Expires())))
 		w.WriteHeader(http.StatusOK)
 		enc.Encode(struct {
 			Status int                    `json:"status"`
@@ -163,7 +174,7 @@ func main() {
 
 		w.Header().Set("Last-Modified", rfc2616(data.PubDate))
 		w.Header().Set("Expires", rfc2616(data.Expires()))
-		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", 60*10))
+		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge(data.Expires())))
 		w.WriteHeader(http.StatusOK)
 
 		enc.Encode(struct {
