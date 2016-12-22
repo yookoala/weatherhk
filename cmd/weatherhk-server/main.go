@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/yookoala/weatherhk/hkodata"
+	"github.com/yookoala/weatherhk/httpcache"
 )
 
 var port int
@@ -40,23 +42,61 @@ func init() {
 
 }
 
-// enforceHTTPS is a simple middleware to enforce HTTPS on demand
-func enforceHTTPS(forceHTTPS bool, inner http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if forceHTTPS && r.Header.Get("X-Forwarded-Proto") != "https" {
-			redirectURL := *r.URL
-			redirectURL.Host = hostname
-			redirectURL.Scheme = "https"
-			log.Printf("run here: %s", redirectURL)
+// Middleware describes a generic http middleware
+type Middleware func(http.Handler) http.Handler
 
-			w.Header().Set("Location", redirectURL.String())
-			w.WriteHeader(http.StatusMovedPermanently)
-			return
+func chain(middlewares ...Middleware) (chained Middleware) {
+	return func(inner http.Handler) (handler http.Handler) {
+		handler = inner
+
+		// loop from inner to outer wrapping
+		// (reverse order of how things actually run)
+		for i := len(middlewares) - 1; i > 0; i-- {
+			handler = middlewares[i](handler)
 		}
-
-		// pass through to inner handler
-		inner.ServeHTTP(w, r)
+		return
 	}
+}
+
+// enforceHTTPS is a simple middleware to enforce HTTPS on demand
+func enforceHTTPS(forceHTTPS bool) Middleware {
+	return func(inner http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if forceHTTPS && r.Header.Get("X-Forwarded-Proto") != "https" {
+				redirectURL := *r.URL
+				redirectURL.Host = hostname
+				redirectURL.Scheme = "https"
+				w.Header().Set("Location", redirectURL.String())
+				w.WriteHeader(http.StatusMovedPermanently)
+				return
+			}
+
+			// pass through to inner handler
+			inner.ServeHTTP(w, r)
+		})
+	}
+}
+
+func timeRequest(inner http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestID := r.Header.Get("X-Request-ID")
+
+		start := time.Now()
+		inner.ServeHTTP(w, r)
+		spent := time.Now().Sub(start)
+
+		log.Printf("request-id=%s, request-time=%s", requestID, spent.String())
+	})
+}
+
+func genRequestID(inner http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// if X-Request-ID not exist, generate one
+		if r.Header.Get("X-Request-ID") == "" {
+			r.Header.Set("X-Request-ID", fmt.Sprintf("%x", sha1.Sum([]byte(time.Now().String())))[:7])
+		}
+		inner.ServeHTTP(w, r)
+	})
 }
 
 func rfc2616(t time.Time) string {
@@ -93,7 +133,7 @@ func main() {
 
 		req, err := http.Get("http://rss.weather.gov.hk/rss/CurrentWeather.xml")
 		if err != nil {
-			log.Printf("request-id: %s, err: %s", requestID, err.Error())
+			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
 			return
 		}
 
@@ -103,7 +143,7 @@ func main() {
 		// decode the RSS
 		data, err := hkodata.DecodeCurrentWeather(req.Body)
 		if err != nil {
-			log.Printf("request-id: %s, err: %s", requestID, err.Error())
+			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			enc.Encode(struct {
 				Status  int    `json:"status"`
@@ -145,7 +185,7 @@ func main() {
 
 		req, err := http.Get(source)
 		if err != nil {
-			log.Printf("request-id: %s, err: %s", requestID, err.Error())
+			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
 			return
 		}
 
@@ -155,7 +195,7 @@ func main() {
 		// decode the RSS
 		data, err := hkodata.DecodeRegionJSON(req.Body)
 		if err != nil {
-			log.Printf("request-id: %s, err: %s", requestID, err.Error())
+			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			enc.Encode(struct {
 				Status  int    `json:"status"`
@@ -194,5 +234,11 @@ func main() {
 	})
 
 	log.Printf("listen at port %d", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), enforceHTTPS(forceHTTPS, r))
+	middlewares := chain(
+		genRequestID,
+		timeRequest,
+		enforceHTTPS(forceHTTPS),
+		httpcache.CacheHandler,
+	)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), middlewares(r))
 }
