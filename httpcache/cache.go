@@ -36,31 +36,45 @@ var redisCache *rcache.Codec
 func init() {
 	redisURLs := strings.Split(os.Getenv("REDIS_URL"), ";")
 
+	log.Printf("REDIS_URL: %#v", redisURLs)
+
 	addrs := make(map[string]string)
+	var password string
 	for _, urlStr := range redisURLs {
+
 		redisURL, err := url.Parse(urlStr)
 		if err != nil {
-			log.Fatalf("Invalid REDIS_URL: %s should be \"HOST:PORT\" string. "+
+			log.Fatalf("Invalid REDIS_URL: %s should be \"redis://HOST:PORT\" string. "+
 				"If you have multiple of them, separate with \";\"", redisURL)
 			continue
 		}
 
 		splited := strings.Split(redisURL.Host, ":")
-		if len(splited) == 2 {
+		if len(splited) == 2 && splited[0] != "" {
 			addrs[splited[0]] = ":" + splited[1]
-		} else if len(splited) == 1 {
+			log.Printf("redis Ring added: %s:%s", splited[0], splited[1])
+		} else if len(splited) == 1 && splited[0] != "" {
 			addrs[splited[0]] = ":6379"
+			log.Printf("redis Ring added: %s:6379", splited[0])
 		} else {
 			log.Fatalf("Invalid REDIS_URL: %s should be \"HOST:PORT\" string. "+
 				"If you have multiple of them, separate with \";\"", redisURL)
 			continue
+		}
+
+		// parse user information
+		if redisURL.User != nil {
+			if pass, ok := redisURL.User.Password(); ok {
+				password = pass
+			}
 		}
 	}
 
 	// assign global redisCache
 	redisCache = &rcache.Codec{
 		Redis: redis.NewRing(&redis.RingOptions{
-			Addrs: addrs,
+			Addrs:    addrs,
+			Password: password,
 		}),
 		Marshal: func(v interface{}) ([]byte, error) {
 			return json.Marshal(v)
