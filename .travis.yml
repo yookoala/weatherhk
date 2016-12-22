@@ -1,5 +1,11 @@
 language: go
 
+services:
+  - redis-server
+
+env:
+  - REDIS_URL=redis://localhost:6379
+
 go:
   - 1.4
   - 1.6
