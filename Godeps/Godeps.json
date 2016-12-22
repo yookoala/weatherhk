@@ -16,6 +16,11 @@
 			"Rev": "196d48ce4ae8cf1c8f87088d2884eca214240887"
 		},
 		{
+			"ImportPath": "github.com/bradfitz/gomemcache/memcache",
+			"Comment": "release.r60-43-g2fafb84",
+			"Rev": "2fafb84a66c4911e11a8f50955b01e74fe3ab9c5"
+		},
+		{
 			"ImportPath": "github.com/go-restit/lzjson",
 			"Rev": "efe3c53acc682f0a1f43cecd3e3e0d535af3e73e"
 		},
@@ -28,6 +33,10 @@
 			"ImportPath": "github.com/gorilla/mux",
 			"Comment": "v1.1-27-g757bef9",
 			"Rev": "757bef944d0f21880861c2dd9c871ca543023cba"
+		},
+		{
+			"ImportPath": "github.com/kr/text",
+			"Rev": "7cafcd837844e784b526369c9bce262804aebc60"
 		},
 		{
 			"ImportPath": "github.com/mmcdole/gofeed/extensions",
@@ -47,6 +56,11 @@
 		{
 			"ImportPath": "github.com/mmcdole/goxpp",
 			"Rev": "e38884aa48c1952a416ba35f3c276e4f02f9b40e"
+		},
+		{
+			"ImportPath": "github.com/tonnerre/golang-pretty",
+			"Comment": "debian/0.0_git20130613-1-1-ge7fccc0",
+			"Rev": "e7fccc03e91bad289b96c21aa3312a220689bdd7"
 		},
 		{
 			"ImportPath": "golang.org/x/net/html",
