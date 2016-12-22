@@ -223,7 +223,7 @@ func CacheHandler(inner http.Handler) http.Handler {
 		// try to load cache for the request
 		cache, err := Load(r)
 		if err != nil {
-			log.Printf("request-id=%s, message=error loading cache: %s", requestID, err.Error())
+			log.Printf("method=%s, url=%s, request-id=%s, message=error loading cache: %s", r.Method, r.URL.String(), requestID, err.Error())
 		}
 
 		// if has cache, write to ResponseWriter and return early
@@ -233,13 +233,13 @@ func CacheHandler(inner http.Handler) http.Handler {
 		}
 
 		// refresh cache by running inner handler
-		log.Printf("request-id=%s, message=no valid cache, trigger inner handler", requestID)
+		log.Printf("method=%s, url=%s, request-id=%s, message=no valid cache, trigger inner handler", r.Method, r.URL.String(), requestID)
 		cache = NewCache(w)
 		inner.ServeHTTP(cache, r)
 		go func() {
 			err := Save(r, cache)
 			if err != nil {
-				log.Printf("request-id=%s, message=error saving cache: %s", requestID, err.Error())
+				log.Printf("method=%s, url=%s, request-id=%s, message=error saving cache: %s", r.Method, r.URL.String(), requestID, err.Error())
 			}
 		}()
 	})
