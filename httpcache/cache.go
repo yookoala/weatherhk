@@ -13,6 +13,12 @@ import (
 	redis "gopkg.in/redis.v5"
 )
 
+var HKT *time.Location
+
+func init() {
+	HKT, _ = time.LoadLocation("Asia/Hong_Kong")
+}
+
 const fmtRFC2612 = "Mon, 02 Jan 2006 15:04:05 GMT"
 
 func parseRFC2612(str string) (t time.Time, err error) {
@@ -34,7 +40,8 @@ var redisCache *rcache.Codec
 func init() {
 	redisURL, err := redis.ParseURL(os.Getenv("REDIS_URL"))
 	if err != nil {
-		log.Fatalf("invalid REDIS_URL: %s", err.Error())
+		log.Printf("invalid REDIS_URL: %s", err.Error())
+		return
 	}
 
 	// assign global redisCache
@@ -95,18 +102,22 @@ func (cache *Cache) Expired() bool {
 			log.Printf("error parsing X-Grace-Expires: %s", err.Error())
 			return true // treat as expired if error
 		}
+		log.Printf("grace expires effective")
 	} else if expiresStr := cache.Header().Get("Expires"); expiresStr != "" {
 		expires, err = parseRFC2612(expiresStr)
 		if err != nil {
 			log.Printf("error parsing Expires: %s", err.Error())
 			return true // treat as expired if error
 		}
+		log.Printf("header expires effective")
 	}
 
 	if time.Now().Before(expires) {
+		log.Printf("not expired yet")
 		return false
 	}
 
+	log.Printf("expired: %s", expires.In(HKT).String())
 	return true // default treat as expired
 }
 
