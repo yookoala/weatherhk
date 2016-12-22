@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/bradfitz/gomemcache/memcache"
+	rcache "gopkg.in/go-redis/cache.v5"
+	redis "gopkg.in/redis.v5"
 )
 
 const fmtRFC2612 = "Mon, 02 Jan 2006 15:04:05 GMT"
@@ -29,11 +31,44 @@ func parseRFC2612(str string) (t time.Time, err error) {
 	return
 }
 
-var client *memcache.Client
+var redisCache *rcache.Codec
 
 func init() {
-	memcachedURL := strings.Split(os.Getenv("MEMCACHED_URL"), ";")
-	client = memcache.New(memcachedURL...)
+	redisURLs := strings.Split(os.Getenv("REDIS_URL"), ";")
+
+	addrs := make(map[string]string)
+	for _, urlStr := range redisURLs {
+		redisURL, err := url.Parse(urlStr)
+		if err != nil {
+			log.Fatalf("Invalid REDIS_URL: %s should be \"HOST:PORT\" string. "+
+				"If you have multiple of them, separate with \";\"", redisURL)
+			continue
+		}
+
+		splited := strings.Split(redisURL.Host, ":")
+		if len(splited) == 2 {
+			addrs[splited[0]] = ":" + splited[1]
+		} else if len(splited) == 1 {
+			addrs[splited[0]] = ":6379"
+		} else {
+			log.Fatalf("Invalid REDIS_URL: %s should be \"HOST:PORT\" string. "+
+				"If you have multiple of them, separate with \";\"", redisURL)
+			continue
+		}
+	}
+
+	// assign global redisCache
+	redisCache = &rcache.Codec{
+		Redis: redis.NewRing(&redis.RingOptions{
+			Addrs: addrs,
+		}),
+		Marshal: func(v interface{}) ([]byte, error) {
+			return json.Marshal(v)
+		},
+		Unmarshal: func(b []byte, v interface{}) error {
+			return json.Unmarshal(b, v)
+		},
+	}
 }
 
 // NewCache wraps an http.ResponswWriter with Cache
@@ -159,13 +194,9 @@ func Load(r *http.Request) (cache *Cache, err error) {
 	if err != nil {
 		return
 	}
-	p, err := client.Get(key)
-	if err != nil {
-		return
-	}
 
 	cache = &Cache{}
-	if err = json.Unmarshal(p.Value, cache); err != nil {
+	if err = redisCache.Get(key, cache); err != nil {
 		cache = nil
 		return
 	}
@@ -183,19 +214,12 @@ func Save(r *http.Request, cache *Cache) (err error) {
 	cache.CachedHeader = cache.Header()
 	cache.CachedContent = cache.String()
 
-	p, err := json.Marshal(cache)
-	if err != nil {
-		return
-	}
-
-	//log.Printf("save cache: %s, %s", key, p)
-
 	// store the httpcache item in memcached
-	client.Set(&memcache.Item{
-		Key:   key,
-		Value: p,
+	return redisCache.Set(&rcache.Item{
+		Key:        key,
+		Object:     cache,
+		Expiration: 60 * time.Minute, // TODO: detect correct expiration time
 	})
-	return nil
 }
 
 // Delete deletes cache of a given request
@@ -204,7 +228,7 @@ func Delete(r *http.Request) (err error) {
 	if err != nil {
 		return
 	}
-	return client.Delete(key)
+	return redisCache.Delete(key)
 }
 
 // CacheHandler applies httpcache to the wrapped http.Handler

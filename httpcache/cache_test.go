@@ -125,6 +125,10 @@ func TestCache_WriteTo(t *testing.T) {
 }
 
 func TestLoad(t *testing.T) {
+	if url := os.Getenv("REDIS_URL"); url == "" {
+		t.Skip("REDIS_URL not set, test skipped")
+	}
+
 	_, err := httpcache.Load(nil)
 	if err == nil {
 		t.Errorf("expected error, got nil")
@@ -140,8 +144,8 @@ func TestLoad(t *testing.T) {
 
 func TestCacheHandler(t *testing.T) {
 
-	if url := os.Getenv("MEMCACHED_URL"); url == "" {
-		t.Skip("MEMCACHED_URL not set, test skipped")
+	if url := os.Getenv("REDIS_URL"); url == "" {
+		t.Skip("REDIS_URL not set, test skipped")
 	}
 
 	// handler to be wrapped
