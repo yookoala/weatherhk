@@ -4,15 +4,28 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
+	"io"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/go-kit/kit/log"
 	rcache "gopkg.in/go-redis/cache.v5"
 	redis "gopkg.in/redis.v5"
 )
 
+var logger log.Logger
+
+func init() {
+	SetLogOutput(os.Stdout)
+}
+
+// SetLogOutput sets the output for log messages
+func SetLogOutput(out io.Writer) {
+	logger = log.NewLogfmtLogger(out)
+}
+
+// HKT stores *time.Location of Hong Kong
 var HKT *time.Location
 
 func init() {
@@ -40,7 +53,9 @@ var redisCache *rcache.Codec
 func init() {
 	redisURL, err := redis.ParseURL(os.Getenv("REDIS_URL"))
 	if err != nil {
-		log.Printf("invalid REDIS_URL: %s", err.Error())
+		logger.Log(
+			"status", "error",
+			"message", fmt.Sprintf("invalid REDIS_URL: %s", err.Error()))
 		return
 	}
 
@@ -99,25 +114,37 @@ func (cache *Cache) Expired() bool {
 	if expiresStr := cache.Header().Get("X-Grace-Expires"); expiresStr != "" {
 		expires, err = parseRFC2612(expiresStr)
 		if err != nil {
-			log.Printf("error parsing X-Grace-Expires: %s", err.Error())
+			logger.Log(
+				"at", "error",
+				"message", fmt.Sprintf("error parsing X-Grace-Expires: %s", err.Error()))
 			return true // treat as expired if error
 		}
-		log.Printf("grace expires effective")
+		logger.Log(
+			"at", "info",
+			"message", "grace expires effective")
 	} else if expiresStr := cache.Header().Get("Expires"); expiresStr != "" {
 		expires, err = parseRFC2612(expiresStr)
 		if err != nil {
-			log.Printf("error parsing Expires: %s", err.Error())
+			logger.Log(
+				"at", "error",
+				"message", fmt.Sprintf("error parsing Expires: %s", err.Error()))
 			return true // treat as expired if error
 		}
-		log.Printf("header expires effective")
+		logger.Log(
+			"at", "info",
+			"message", "header expires effective")
 	}
 
 	if time.Now().Before(expires) {
-		log.Printf("not expired yet")
+		logger.Log(
+			"at", "info",
+			"message", "not expired yet")
 		return false
 	}
 
-	log.Printf("expired: %s", expires.In(HKT).String())
+	logger.Log(
+		"at", "info",
+		"message", fmt.Sprintf("expired: %s", expires.In(HKT).String()))
 	return true // default treat as expired
 }
 
@@ -230,28 +257,35 @@ func CacheHandler(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		requestID := r.Header.Get("X-Request-ID")
+		basicCtx := log.NewContext(logger).With(
+			"method", r.Method,
+			"url", r.URL.EscapedPath(),
+			"request_id", requestID)
+		infoLog := basicCtx.WithPrefix("at", "info")
+		errorLog := basicCtx.WithPrefix("at", "error")
 
 		// try to load cache for the request
 		cache, err := Load(r)
 		if err != nil {
-			log.Printf("method=%s, url=%s, request-id=%s, message=error loading cache: %s", r.Method, r.URL.String(), requestID, err.Error())
+			errorLog.Log("message", fmt.Sprintf("error loading cache: %s", err.Error()))
 		}
 
 		// if has cache, write to ResponseWriter and return early
 		if cache != nil && !cache.Expired() {
-			log.Printf("method=%s, url=%s, request-id=%s, message=%#v", r.Method, r.URL.String(), requestID, "use cache")
+			infoLog.Log("message", "use cache")
 			cache.WriteTo(w)
 			return // early return
 		}
 
 		// refresh cache by running inner handler
-		log.Printf("method=%s, url=%s, request-id=%s, message=no valid cache, trigger inner handler", r.Method, r.URL.String(), requestID)
+		infoLog.Log("message", "no valid cache, trigger inner handler")
+
 		cache = NewCache(w)
 		inner.ServeHTTP(cache, r)
 		go func() {
 			err := Save(r, cache)
 			if err != nil {
-				log.Printf("method=%s, url=%s, request-id=%s, message=error saving cache: %s", r.Method, r.URL.String(), requestID, err.Error())
+				errorLog.Log("message", fmt.Sprintf("error saving cache: %s", err.Error()))
 			}
 		}()
 	})

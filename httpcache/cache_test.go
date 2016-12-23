@@ -3,7 +3,6 @@ package httpcache_test
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -269,8 +268,9 @@ func BenchmarkCacheHandler(b *testing.B) {
 		b.Skip("REDIS_URL not set, benchmark skipped")
 	}
 
-	log.SetFlags(0)
-	log.SetOutput(ioutil.Discard)
+	// discard log output
+	httpcache.SetLogOutput(ioutil.Discard)
+	defer httpcache.SetLogOutput(os.Stdout)
 
 	// handler to be wrapped
 	inner := &testHandler{
