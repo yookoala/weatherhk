@@ -14,6 +14,22 @@ import (
 	redis "gopkg.in/redis.v5"
 )
 
+// Error represents error in httpcache
+type Error int
+
+const (
+	// HeaderNotExists represents error if header field is empty
+	// or does not exists
+	HeaderNotExists Error = iota
+)
+
+func (err Error) Error() string {
+	if err == HeaderNotExists {
+		return "header field not exits"
+	}
+	return "unknown error"
+}
+
 // HKT stores *time.Location of Hong Kong
 var HKT *time.Location
 
@@ -90,37 +106,14 @@ func (cache *Cache) Code() int {
 
 // TODO: add method to check Last-Modified date / Date of the cached response
 
-// Expired check if the cache should expire
-func (cache *Cache) Expired() bool {
-	var expires time.Time
-	var err error
-
-	// TODO: might support max-age somehow?
-
-	// parse grace expires override
-	if expiresStr := cache.Header().Get("X-Grace-Expires"); expiresStr != "" {
-		expires, err = parseRFC2612(expiresStr)
-		if err != nil {
-			log.Printf("error parsing X-Grace-Expires: %s", err.Error())
-			return true // treat as expired if error
-		}
-		log.Printf("grace expires effective")
-	} else if expiresStr := cache.Header().Get("Expires"); expiresStr != "" {
-		expires, err = parseRFC2612(expiresStr)
-		if err != nil {
-			log.Printf("error parsing Expires: %s", err.Error())
-			return true // treat as expired if error
-		}
-		log.Printf("header expires effective")
+// ParseTime parses the http header field with RFC2612 format
+func (cache *Cache) ParseTime(name string) (parsed time.Time, err error) {
+	var timeStr string
+	if timeStr = cache.Header().Get(name); timeStr == "" {
+		err = HeaderNotExists
+		return
 	}
-
-	if time.Now().Before(expires) {
-		log.Printf("not expired yet")
-		return false
-	}
-
-	log.Printf(fmt.Sprintf("expired: %s", expires.In(HKT).String()))
-	return true // default treat as expired
+	return parseRFC2612(timeStr)
 }
 
 // String return buffered content as string
@@ -153,6 +146,9 @@ func (cache *Cache) WriteTo(w http.ResponseWriter) {
 
 // Header implements http.ResponseWriter
 func (cache *Cache) Header() http.Header {
+	if cache == nil {
+		return nil
+	}
 	if cache.responseWriter != nil {
 		return cache.responseWriter.Header()
 	}
@@ -227,6 +223,35 @@ func Delete(r *http.Request) (err error) {
 	return redisCache.Delete(key)
 }
 
+// Valid test if a cache has valid cache
+func Valid(r *http.Request, cache *Cache) bool {
+	var expires time.Time
+	var err error
+	infoLog, errorLog := ctxlog.GetLoggers(r)
+
+	// TODO: might support max-age somehow?
+
+	// parse grace expires override
+	if expires, err = cache.ParseTime("X-Grace-Expires"); err == nil {
+		if expires.After(time.Now()) {
+			infoLog.Log("message", "cache graced")
+			return true
+		}
+	} else if err != HeaderNotExists {
+		errorLog.Log("message", fmt.Sprintf("error parsing X-Grace-Expires (%s)", err.Error()))
+	}
+
+	if expires, err = cache.ParseTime("Expires"); err == nil {
+		if expires.After(time.Now()) {
+			infoLog.Log("message", "cache not expired")
+			return true
+		}
+	} else if err != HeaderNotExists {
+		errorLog.Log("message", fmt.Sprintf("error parsing Expires (%s)", err.Error()))
+	}
+	return false // default treat as expired
+}
+
 // CacheHandler applies httpcache to the wrapped http.Handler
 func CacheHandler(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -240,7 +265,7 @@ func CacheHandler(inner http.Handler) http.Handler {
 		}
 
 		// if has cache, write to ResponseWriter and return early
-		if cache != nil && !cache.Expired() {
+		if Valid(r, cache) {
 			infoLog.Log("message", "use cache")
 			cache.WriteTo(w)
 			return // early return

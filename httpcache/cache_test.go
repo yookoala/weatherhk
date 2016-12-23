@@ -37,6 +37,7 @@ func TestCache(t *testing.T) {
 	})
 
 	w := httpcache.NewCache(httptest.NewRecorder())
+	r, _ := http.NewRequest("GET", "/dummy.html", nil)
 	handler.ServeHTTP(w, nil)
 
 	if want, have := "Custom message", w.String(); want != have {
@@ -51,22 +52,23 @@ func TestCache(t *testing.T) {
 	if want, have := http.StatusPartialContent, w.Code(); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
-	if want, have := true, w.Expired(); want != have {
+	if want, have := false, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 }
 
-func TestCache_Expired(t *testing.T) {
+func TestValid(t *testing.T) {
 	w := httpcache.NewCache(httptest.NewRecorder())
+	r, _ := http.NewRequest("GET", "/dummy.html", nil)
 
 	// manually update "Expires" header and check again
 	w.Header().Set("Expires", rfc2616(time.Now().Add(60*time.Second))) // should be rfc2616 format
-	if want, have := false, w.Expired(); want != have {
+	if want, have := true, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 
 	w.Header().Set("Expires", rfc2616(time.Now().Add(-60*time.Second))) // should be rfc2616 format
-	if want, have := true, w.Expired(); want != have {
+	if want, have := false, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 
@@ -74,25 +76,25 @@ func TestCache_Expired(t *testing.T) {
 	// polluting "Expires" header (custom "X-Grace-Expires" header)
 	w.Header().Set("Expires", rfc2616(time.Now().Add(-60*time.Second)))        // should be rfc2616 format
 	w.Header().Set("X-Grace-Expires", rfc2616(time.Now().Add(60*time.Second))) // should be rfc2616 format
-	if want, have := false, w.Expired(); want != have {
+	if want, have := true, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 
 	w.Header().Del("X-Grace-Expires")
 	w.Header().Set("Expires", "some non-sense")
-	if want, have := true, w.Expired(); want != have {
+	if want, have := false, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 
 	w.Header().Del("Expires")
 	w.Header().Set("X-Grace-Expires", "some non-sense")
-	if want, have := true, w.Expired(); want != have {
+	if want, have := false, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 
 	w.Header().Del("Expires")
 	w.Header().Del("X-Grace-Expires")
-	if want, have := true, w.Expired(); want != have {
+	if want, have := false, httpcache.Valid(r, w); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
 	}
 
