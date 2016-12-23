@@ -239,6 +239,7 @@ func CacheHandler(inner http.Handler) http.Handler {
 
 		// if has cache, write to ResponseWriter and return early
 		if cache != nil && !cache.Expired() {
+			log.Printf("method=%s, url=%s, request-id=%s, message=%#v", r.Method, r.URL.String(), requestID, "use cache")
 			cache.WriteTo(w)
 			return // early return
 		}
