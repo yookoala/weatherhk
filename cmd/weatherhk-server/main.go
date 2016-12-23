@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -118,6 +119,13 @@ func maxAge(expires time.Time) (maxAge int) {
 }
 
 func main() {
+
+	// prevent logging date on heroku
+	// heroku already took care of timestamp
+	if strings.ToLower(os.Getenv("ON_HEROKU")) == "true" {
+		log.SetFlags(0) // no timestamp on heroku
+	}
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
