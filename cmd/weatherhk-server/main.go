@@ -51,7 +51,7 @@ func chain(middlewares ...Middleware) (chained Middleware) {
 
 		// loop from inner to outer wrapping
 		// (reverse order of how things actually run)
-		for i := len(middlewares) - 1; i > 0; i-- {
+		for i := len(middlewares) - 1; i >= 0; i-- {
 			handler = middlewares[i](handler)
 		}
 		return
