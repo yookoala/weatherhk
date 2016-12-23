@@ -163,6 +163,10 @@ func main() {
 		w.Header().Set("Last-Modified", rfc2616(data.PubDate))
 		w.Header().Set("Expires", rfc2616(data.Expires()))
 		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge(data.Expires())))
+		if data.Expires().Before(time.Now()) {
+			// Add grace expiration 5 minutes, if already expired
+			w.Header().Set("X-Grace-Expires", rfc2616(time.Now().Add(5*time.Minute)))
+		}
 		w.WriteHeader(http.StatusOK)
 		enc.Encode(struct {
 			Status int                    `json:"status"`
@@ -215,6 +219,10 @@ func main() {
 		w.Header().Set("Last-Modified", rfc2616(data.PubDate))
 		w.Header().Set("Expires", rfc2616(data.Expires()))
 		w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d", maxAge(data.Expires())))
+		if data.Expires().Before(time.Now()) {
+			// Add grace expiration 5 minutes, if already expired
+			w.Header().Set("X-Grace-Expires", rfc2616(time.Now().Add(5*time.Minute)))
+		}
 		w.WriteHeader(http.StatusOK)
 
 		enc.Encode(struct {
