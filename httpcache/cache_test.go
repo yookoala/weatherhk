@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/yookoala/weatherhk/ctxlog"
 	"github.com/yookoala/weatherhk/httpcache"
 )
 
@@ -269,8 +270,8 @@ func BenchmarkCacheHandler(b *testing.B) {
 	}
 
 	// discard log output
-	httpcache.SetLogOutput(ioutil.Discard)
-	defer httpcache.SetLogOutput(os.Stdout)
+	ctxlog.SetLogOutput(ioutil.Discard)
+	defer ctxlog.SetLogOutput(os.Stdout)
 
 	// handler to be wrapped
 	inner := &testHandler{

@@ -4,26 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/go-kit/kit/log"
+	"github.com/yookoala/weatherhk/ctxlog"
 	rcache "gopkg.in/go-redis/cache.v5"
 	redis "gopkg.in/redis.v5"
 )
-
-var logger log.Logger
-
-func init() {
-	SetLogOutput(os.Stdout)
-}
-
-// SetLogOutput sets the output for log messages
-func SetLogOutput(out io.Writer) {
-	logger = log.NewLogfmtLogger(out)
-}
 
 // HKT stores *time.Location of Hong Kong
 var HKT *time.Location
@@ -53,9 +42,7 @@ var redisCache *rcache.Codec
 func init() {
 	redisURL, err := redis.ParseURL(os.Getenv("REDIS_URL"))
 	if err != nil {
-		logger.Log(
-			"status", "error",
-			"message", fmt.Sprintf("invalid REDIS_URL: %s", err.Error()))
+		log.Printf("invalid REDIS_URL: %s", err.Error())
 		return
 	}
 
@@ -114,37 +101,25 @@ func (cache *Cache) Expired() bool {
 	if expiresStr := cache.Header().Get("X-Grace-Expires"); expiresStr != "" {
 		expires, err = parseRFC2612(expiresStr)
 		if err != nil {
-			logger.Log(
-				"at", "error",
-				"message", fmt.Sprintf("error parsing X-Grace-Expires: %s", err.Error()))
+			log.Printf("error parsing X-Grace-Expires: %s", err.Error())
 			return true // treat as expired if error
 		}
-		logger.Log(
-			"at", "info",
-			"message", "grace expires effective")
+		log.Printf("grace expires effective")
 	} else if expiresStr := cache.Header().Get("Expires"); expiresStr != "" {
 		expires, err = parseRFC2612(expiresStr)
 		if err != nil {
-			logger.Log(
-				"at", "error",
-				"message", fmt.Sprintf("error parsing Expires: %s", err.Error()))
+			log.Printf("error parsing Expires: %s", err.Error())
 			return true // treat as expired if error
 		}
-		logger.Log(
-			"at", "info",
-			"message", "header expires effective")
+		log.Printf("header expires effective")
 	}
 
 	if time.Now().Before(expires) {
-		logger.Log(
-			"at", "info",
-			"message", "not expired yet")
+		log.Printf("not expired yet")
 		return false
 	}
 
-	logger.Log(
-		"at", "info",
-		"message", fmt.Sprintf("expired: %s", expires.In(HKT).String()))
+	log.Printf(fmt.Sprintf("expired: %s", expires.In(HKT).String()))
 	return true // default treat as expired
 }
 
@@ -256,13 +231,7 @@ func Delete(r *http.Request) (err error) {
 func CacheHandler(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		requestID := r.Header.Get("X-Request-ID")
-		basicCtx := log.NewContext(logger).With(
-			"method", r.Method,
-			"url", r.URL.EscapedPath(),
-			"request_id", requestID)
-		infoLog := basicCtx.WithPrefix("at", "info")
-		errorLog := basicCtx.WithPrefix("at", "error")
+		infoLog, errorLog := ctxlog.GetLoggers(r)
 
 		// try to load cache for the request
 		cache, err := Load(r)

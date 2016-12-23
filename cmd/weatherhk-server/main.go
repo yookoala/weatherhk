@@ -4,14 +4,13 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/yookoala/weatherhk/ctxlog"
 	"github.com/yookoala/weatherhk/hkodata"
 	"github.com/yookoala/weatherhk/httpcache"
 )
@@ -80,13 +79,11 @@ func enforceHTTPS(forceHTTPS bool) Middleware {
 
 func timeRequest(inner http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		requestID := r.Header.Get("X-Request-ID")
-
 		start := time.Now()
 		inner.ServeHTTP(w, r)
 		spent := time.Now().Sub(start)
-
-		log.Printf("request-id=%s, request-time=%s", requestID, spent.String())
+		infoLog, _ := ctxlog.GetLoggers(r)
+		infoLog.Log("response_time", spent.String())
 	})
 }
 
@@ -120,12 +117,6 @@ func maxAge(expires time.Time) (maxAge int) {
 
 func main() {
 
-	// prevent logging date on heroku
-	// heroku already took care of timestamp
-	if strings.ToLower(os.Getenv("ON_HEROKU")) == "true" {
-		log.SetFlags(0) // no timestamp on heroku
-	}
-
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -137,11 +128,12 @@ func main() {
 	r.HandleFunc("/api/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-		requestID := r.Header.Get("X-Request-ID")
+		// get contexted loggers
+		_, errorLog := ctxlog.GetLoggers(r)
 
 		req, err := http.Get("http://rss.weather.gov.hk/rss/CurrentWeather.xml")
 		if err != nil {
-			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
+			errorLog.Log("message", err.Error())
 			return
 		}
 
@@ -151,7 +143,7 @@ func main() {
 		// decode the RSS
 		data, err := hkodata.DecodeCurrentWeather(req.Body)
 		if err != nil {
-			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
+			errorLog.Log("message", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			enc.Encode(struct {
 				Status  int    `json:"status"`
@@ -192,12 +184,14 @@ func main() {
 	r.HandleFunc("/api/region.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-		requestID := r.Header.Get("X-Request-ID")
+		// get contexted loggers
+		_, errorLog := ctxlog.GetLoggers(r)
+
 		source := "http://www.hko.gov.hk/wxinfo/json/region_json.xml"
 
 		req, err := http.Get(source)
 		if err != nil {
-			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
+			errorLog.Log("message", err.Error())
 			return
 		}
 
@@ -207,7 +201,7 @@ func main() {
 		// decode the RSS
 		data, err := hkodata.DecodeRegionJSON(req.Body)
 		if err != nil {
-			log.Printf("request-id=%s, err=%#v", requestID, err.Error())
+			errorLog.Log("message", err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
 			enc.Encode(struct {
 				Status  int    `json:"status"`
@@ -249,7 +243,7 @@ func main() {
 
 	})
 
-	log.Printf("listen at port %d", port)
+	fmt.Printf("listen at port %d", port)
 	middlewares := chain(
 		genRequestID,
 		timeRequest,
