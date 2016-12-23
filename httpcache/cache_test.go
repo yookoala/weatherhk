@@ -2,6 +2,8 @@ package httpcache_test
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -199,5 +201,87 @@ func TestCacheHandler(t *testing.T) {
 	}
 	if want, have := http.StatusPartialContent, cache.Code(); want != have {
 		t.Errorf("expected %#v, got %#v", want, have)
+	}
+}
+
+type testHandler struct {
+	message string
+	expires time.Duration
+	wait    time.Duration
+	called  int
+}
+
+func (handler *testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	handler.called += 1
+	time.Sleep(handler.wait)
+	go func() {
+		fmt.Fprint(w, handler.message)
+		w.Header().Add("X-Special-Header", "some special header message")
+		w.Header().Add("Expires", rfc2616(time.Now().Add(handler.expires)))
+		w.WriteHeader(http.StatusPartialContent)
+	}()
+}
+
+func benchmarkCacheHandler(b *testing.B, handler http.Handler) {
+
+	// request once to activate the cache
+	w := httptest.NewRecorder()
+	r, _ := http.NewRequest("GET", "/some/path1.html", nil)
+	handler.ServeHTTP(w, r)
+	defer httpcache.Delete(r)
+
+	// wait a bit for cache to handle
+	time.Sleep(500 * time.Millisecond)
+
+	b.StartTimer()
+	for n := 0; n < b.N; n++ {
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, r)
+	}
+	b.StopTimer()
+}
+
+func BenchmarkCacheHandler_dry(b *testing.B) {
+
+	b.StopTimer()
+
+	if url := os.Getenv("REDIS_URL"); url == "" {
+		b.Skip("REDIS_URL not set, benchmark skipped")
+	}
+
+	b.SetParallelism(1)
+
+	// handler to be wrapped
+	inner := &testHandler{
+		message: "custom message",
+		wait:    10 * time.Millisecond,
+		expires: 24 * time.Hour,
+	}
+
+	benchmarkCacheHandler(b, inner)
+}
+
+func BenchmarkCacheHandler(b *testing.B) {
+
+	b.StopTimer()
+
+	if url := os.Getenv("REDIS_URL"); url == "" {
+		b.Skip("REDIS_URL not set, benchmark skipped")
+	}
+
+	log.SetFlags(0)
+	log.SetOutput(ioutil.Discard)
+
+	// handler to be wrapped
+	inner := &testHandler{
+		message: "custom message",
+		wait:    10 * time.Millisecond,
+		expires: 24 * time.Hour,
+	}
+
+	benchmarkCacheHandler(b, httpcache.CacheHandler(inner))
+
+	if want, have := 1, inner.called; want != have {
+		b.Logf("expected %#v, got %#v", want, have)
 	}
 }
