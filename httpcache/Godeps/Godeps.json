@@ -1,0 +1,73 @@
+{
+	"ImportPath": "github.com/yookoala/weatherhk/httpcache",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v75",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/go-kit/kit/log",
+			"Comment": "v0.3.0-38-g905b602",
+			"Rev": "905b60253dbac4a14625ce52217ede00d3a3aca7"
+		},
+		{
+			"ImportPath": "github.com/go-logfmt/logfmt",
+			"Comment": "v0.3.0",
+			"Rev": "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
+		},
+		{
+			"ImportPath": "github.com/go-stack/stack",
+			"Comment": "v1.5.2",
+			"Rev": "100eb0c0a9c5b306ca2fb4f165df21d80ada4b82"
+		},
+		{
+			"ImportPath": "github.com/kr/logfmt",
+			"Rev": "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+		},
+		{
+			"ImportPath": "go4.org/syncutil/singleflight",
+			"Rev": "09d86de304dc27e636298361bbfee4ac6ab04f21"
+		},
+		{
+			"ImportPath": "gopkg.in/go-redis/cache.v5",
+			"Comment": "v5.0.2",
+			"Rev": "2766414f72791c8b0fa60409aa6e27867e9ad0c1"
+		},
+		{
+			"ImportPath": "gopkg.in/go-redis/cache.v5/lrucache",
+			"Comment": "v5.0.2",
+			"Rev": "2766414f72791c8b0fa60409aa6e27867e9ad0c1"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v5",
+			"Comment": "v5.1.4",
+			"Rev": "5e76db680467ebce5495cc2159a9289a6851d773"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v5/internal",
+			"Comment": "v5.1.4",
+			"Rev": "5e76db680467ebce5495cc2159a9289a6851d773"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v5/internal/consistenthash",
+			"Comment": "v5.1.4",
+			"Rev": "5e76db680467ebce5495cc2159a9289a6851d773"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v5/internal/hashtag",
+			"Comment": "v5.1.4",
+			"Rev": "5e76db680467ebce5495cc2159a9289a6851d773"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v5/internal/pool",
+			"Comment": "v5.1.4",
+			"Rev": "5e76db680467ebce5495cc2159a9289a6851d773"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v5/internal/proto",
+			"Comment": "v5.1.4",
+			"Rev": "5e76db680467ebce5495cc2159a9289a6851d773"
+		}
+	]
+}
