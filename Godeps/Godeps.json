@@ -3,9 +3,7 @@
 	"GoVersion": "go1.6",
 	"GodepVersion": "v75",
 	"Packages": [
-		"./hkodata",
-		"./httpcache",
-		"./cmd/weatherhk-server"
+		"./..."
 	],
 	"Deps": [
 		{
@@ -18,8 +16,23 @@
 			"Rev": "196d48ce4ae8cf1c8f87088d2884eca214240887"
 		},
 		{
+			"ImportPath": "github.com/go-kit/kit/log",
+			"Comment": "v0.3.0-38-g905b602",
+			"Rev": "905b60253dbac4a14625ce52217ede00d3a3aca7"
+		},
+		{
+			"ImportPath": "github.com/go-logfmt/logfmt",
+			"Comment": "v0.3.0",
+			"Rev": "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
+		},
+		{
 			"ImportPath": "github.com/go-restit/lzjson",
 			"Rev": "efe3c53acc682f0a1f43cecd3e3e0d535af3e73e"
+		},
+		{
+			"ImportPath": "github.com/go-stack/stack",
+			"Comment": "v1.5.2",
+			"Rev": "100eb0c0a9c5b306ca2fb4f165df21d80ada4b82"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
@@ -30,6 +43,10 @@
 			"ImportPath": "github.com/gorilla/mux",
 			"Comment": "v1.1-27-g757bef9",
 			"Rev": "757bef944d0f21880861c2dd9c871ca543023cba"
+		},
+		{
+			"ImportPath": "github.com/kr/logfmt",
+			"Rev": "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
 		},
 		{
 			"ImportPath": "github.com/kr/text",
