@@ -117,15 +117,9 @@ func maxAge(expires time.Time) (maxAge int) {
 
 func main() {
 
-	r := mux.NewRouter()
+	apiHandler := http.NewServeMux()
 
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "text/html; charset=utf8")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `<html><h1>Simple Hong Kong Weather API</h1><ul><li><a href="/api/CurrentWeather.json">Current Weather</a></li><li><a href="/api/region.json">Region Weather</a></li></ul></html>`)
-	})
-
-	r.HandleFunc("/api/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
+	apiHandler.HandleFunc("/hko/CurrentWeather.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 		// get contexted loggers
@@ -181,7 +175,7 @@ func main() {
 		})
 	})
 
-	r.HandleFunc("/api/region.json", func(w http.ResponseWriter, r *http.Request) {
+	apiHandler.HandleFunc("/hkoPrivate/region.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 		// get contexted loggers
@@ -243,12 +237,21 @@ func main() {
 
 	})
 
-	fmt.Printf("listen at port %d", port)
 	middlewares := chain(
 		genRequestID,
 		timeRequest,
 		enforceHTTPS(forceHTTPS),
 		httpcache.CacheHandler,
 	)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), middlewares(r))
+
+	root := mux.NewRouter()
+	root.PathPrefix("/api").Handler(http.StripPrefix("/api", middlewares(apiHandler)))
+	root.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html; charset=utf8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `<html><h1>Simple Hong Kong Weather API</h1><ul><li><a href="/api/hko/CurrentWeather.json">Current Weather</a></li><li><a href="/api/hkoPrivate/region.json">Region Weather</a></li></ul></html>`)
+	})
+
+	fmt.Printf("listen at port %d\n", port)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), root)
 }
