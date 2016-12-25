@@ -187,6 +187,10 @@ func Load(r *http.Request) (cache *Cache, err error) {
 		return
 	}
 
+	if redisCache == nil {
+		return
+	}
+
 	cache = &Cache{}
 	if err = redisCache.Get(key, cache); err != nil {
 		cache = nil
@@ -199,6 +203,10 @@ func Load(r *http.Request) (cache *Cache, err error) {
 func Save(r *http.Request, cache *Cache) (err error) {
 	key, err := keyOf(r)
 	if err != nil {
+		return
+	}
+
+	if redisCache == nil {
 		return
 	}
 
@@ -220,6 +228,11 @@ func Delete(r *http.Request) (err error) {
 	if err != nil {
 		return
 	}
+
+	if redisCache == nil {
+		return
+	}
+
 	return redisCache.Delete(key)
 }
 
