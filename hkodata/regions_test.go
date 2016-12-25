@@ -471,25 +471,11 @@ func TestDecodeRegionJSON(t *testing.T) {
 		}
 
 		// check if name actually found
-		// special case: se1 has no name
-		if regions.Regions[i].ShortName != "se1" {
-			if regions.Regions[i].Name.En == "" {
-				t.Errorf("The English name of %#v is empty string", regions.Regions[i].ShortName)
-			}
-			if regions.Regions[i].Name.Zh == "" {
-				t.Errorf("The Chinese name of %#v is empty string", regions.Regions[i].ShortName)
-			}
+		if regions.Regions[i].Name.En == "" {
+			t.Errorf("The English name of %#v is empty string", regions.Regions[i].ShortName)
 		}
-
-		// check if empty json name for se1
-		if regions.Regions[i].ShortName == "se1" {
-			bytes, err := json.Marshal(regions.Regions[i].Name)
-			if err != nil {
-				t.Errorf("unexpected error: %s", err.Error())
-			}
-			if want, have := "{}", string(bytes); want != have {
-				t.Errorf("\nexpected: %s\n     got: %s", want, have)
-			}
+		if regions.Regions[i].Name.Zh == "" {
+			t.Errorf("The Chinese name of %#v is empty string", regions.Regions[i].ShortName)
 		}
 	}
 
@@ -568,25 +554,11 @@ func TestDecodeRegionJSON_dummyCase(t *testing.T) {
 		}
 
 		// check if name actually found
-		// special case: se1 has no name
-		if regions.Regions[i].ShortName != "se1" {
-			if regions.Regions[i].Name.En == "" {
-				t.Errorf("The English name of %#v is empty string", regions.Regions[i].ShortName)
-			}
-			if regions.Regions[i].Name.Zh == "" {
-				t.Errorf("The Chinese name of %#v is empty string", regions.Regions[i].ShortName)
-			}
+		if regions.Regions[i].Name.En == "" {
+			t.Errorf("The English name of %#v is empty string", regions.Regions[i].ShortName)
 		}
-
-		// check if empty json name for se1
-		if regions.Regions[i].ShortName == "se1" {
-			bytes, err := json.Marshal(regions.Regions[i].Name)
-			if err != nil {
-				t.Errorf("unexpected error: %s", err.Error())
-			}
-			if want, have := "{}", string(bytes); want != have {
-				t.Errorf("\nexpected: %s\n     got: %s", want, have)
-			}
+		if regions.Regions[i].Name.Zh == "" {
+			t.Errorf("The Chinese name of %#v is empty string", regions.Regions[i].ShortName)
 		}
 	}
 

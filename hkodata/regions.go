@@ -83,7 +83,7 @@ func init() {
 			En: "Lau Fau Shan",
 		},
 		"ngp": {
-			Zh: "昂 坪",
+			Zh: "昂坪",
 			En: "Ngong Ping",
 		},
 		"pen": {
@@ -101,6 +101,10 @@ func init() {
 		"se": {
 			Zh: "啟德",
 			En: "Kai Tak",
+		},
+		"se1": {
+			Zh: "啟德跑道公園",
+			En: "Kai Tak Runway Park",
 		},
 		"sek": {
 			Zh: "石崗",
@@ -136,7 +140,7 @@ func init() {
 		},
 		"swh": {
 			Zh: "西灣河",
-			En: "",
+			En: "Sai Wan Ho",
 		},
 		"tap": {
 			Zh: "塔門",
