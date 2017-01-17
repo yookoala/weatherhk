@@ -246,7 +246,6 @@ func main() {
 	middlewares := chain(
 		genRequestID,
 		timeRequest,
-		enforceHTTPS(forceHTTPS),
 		httpcache.CacheHandler,
 	)
 
@@ -259,5 +258,5 @@ func main() {
 	})
 
 	fmt.Printf("listen at port %d\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), root)
+	http.ListenAndServe(fmt.Sprintf(":%d", port), enforceHTTPS(forceHTTPS)(root))
 }
