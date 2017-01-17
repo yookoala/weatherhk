@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -64,6 +65,11 @@ func enforceHTTPS(forceHTTPS bool) Middleware {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if forceHTTPS && r.Header.Get("X-Forwarded-Proto") != "https" {
 				redirectURL := *r.URL
+				if requestURL, err := url.Parse(r.RequestURI); err == nil {
+					// rewrite the path with RequestURL to prevent path rewriting in mux
+					redirectURL.Path = requestURL.Path
+					redirectURL.RawQuery = requestURL.RawQuery
+				}
 				redirectURL.Host = hostname
 				redirectURL.Scheme = "https"
 				w.Header().Set("Location", redirectURL.String())
