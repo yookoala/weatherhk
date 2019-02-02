@@ -1,4 +1,4 @@
-package cache
+package cache // import "gopkg.in/go-redis/cache.v5"
 
 import (
 	"errors"
