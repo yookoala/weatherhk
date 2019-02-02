@@ -4,7 +4,7 @@ services:
   - redis-server
 
 env:
-  - REDIS_URL=redis://localhost:6379
+  - REDIS_URL=redis://localhost:6379 GO111MODULE=on
 
 go:
   - 1.11.x
